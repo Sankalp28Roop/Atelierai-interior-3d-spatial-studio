@@ -8,6 +8,10 @@
 
 **AtelierAI** is a real-time generative interior architecture studio that translates natural language prompts (English, Hindi, and Hinglish) into interactive architectural layouts, 360° VR interior tours, CAD-dimensional BIM dioramas, WebGL depth displacement meshes, and downloadable orbital 3D models (.GLB).
 
+<div align="center">
+  <img src="./public/assets/images/atelierai_studio_preview.jpg" alt="AtelierAI Spatial Studio Preview" width="100%" style="border-radius: 16px; border: 1px solid #334155; margin-top: 16px; margin-bottom: 24px;" />
+</div>
+
 ---
 
 ## 🌟 Key Features
