@@ -1,0 +1,6 @@
+{
+  "name": "AtelierAI - Intelligent Interior & 3D Spatial Design",
+  "description": "AI-powered interior design studio featuring intelligent intent routing, photorealistic 2D room conceptualization, and interactive 3D furniture models with Google model-viewer.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

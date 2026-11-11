@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper functions for security validation
+    function isSignedIn() {
+      return request.auth != null && request.auth.uid != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() > 0 && id.size() <= 64 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // User Profile Security Rules
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Users cannot enumerate other user accounts
+      
+      allow create: if isOwner(userId) 
+        && request.resource.data.uid == userId
+        && request.resource.data.email is string
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 100
+        && request.resource.data.keys().hasAll(['uid', 'email', 'displayName'])
+        && request.resource.data.keys().hasOnly(['uid', 'email', 'displayName', 'role', 'createdAt', 'updatedAt', 'preferences']);
+
+      allow update: if isOwner(userId)
+        && request.resource.data.uid == userId
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 100
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['displayName', 'role', 'updatedAt', 'preferences']);
+
+      allow delete: if isOwner(userId);
+
+      // Private Designs Subcollection
+      match /designs/{designId} {
+        allow get: if isOwner(userId) && isValidId(designId);
+        allow list: if isOwner(userId);
+
+        allow create: if isOwner(userId) && isValidId(designId)
+          && request.resource.data.userId == userId
+          && request.resource.data.prompt is string
+          && request.resource.data.prompt.size() > 0
+          && request.resource.data.prompt.size() <= 4000
+          && request.resource.data.type in ['2D', '3D']
+          && request.resource.data.mediaUrl is string
+          && request.resource.data.mediaUrl.size() > 0
+          && request.resource.data.mediaUrl.size() <= 1024
+          && request.resource.data.keys().hasAll(['id', 'userId', 'prompt', 'type', 'mediaUrl'])
+          && request.resource.data.keys().hasOnly(['id', 'userId', 'prompt', 'type', 'mediaUrl', 'title', 'source', 'styleName', 'dimensions', 'createdAt']);
+
+        allow update: if isOwner(userId) && isValidId(designId)
+          && request.resource.data.userId == userId
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'styleName', 'notes']);
+
+        allow delete: if isOwner(userId) && isValidId(designId);
+      }
+    }
+
+    // Default deny all other paths
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
